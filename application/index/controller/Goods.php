@@ -325,7 +325,7 @@ class Goods extends Common
         // 是否ajax请求
         if(!IS_AJAX)
         {
-            return $this->error('非法访问');
+            return $this->error('非法访问1');
         }
 
         // 参数
