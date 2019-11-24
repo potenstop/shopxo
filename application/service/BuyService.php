@@ -15,6 +15,7 @@ use think\facade\Hook;
 use app\service\GoodsService;
 use app\service\UserService;
 use app\service\ResourcesService;
+use app\service\OrderCompleteService;
 
 /**
  * 购买服务层
@@ -954,6 +955,8 @@ class BuyService
             // 预约成功
             case 0 :
                 $msg = '预约成功';
+                // 通知活动
+                OrderCompleteService::notice_scact($order_id);
                 break;
 
             // 提交成功

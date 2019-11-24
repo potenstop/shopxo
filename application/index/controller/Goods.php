@@ -10,10 +10,12 @@
 // +----------------------------------------------------------------------
 namespace app\index\controller;
 
+use phpmailer\Exception;
 use think\facade\Hook;
 use app\service\GoodsService;
 use app\service\GoodsCommentsService;
 use app\service\SeoService;
+use think\Container;
 
 /**
  * 商品详情
@@ -368,5 +370,125 @@ class Goods extends Common
         ];
         return DataReturn('请求成功', 0, $result);
     }
+    private function make_password( $length = 8 )
+    {
+        // 密码字符集，可任意添加你需要的字符
+        $chars = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
+            'i', 'j', 'k', 'l','m', 'n', 'o', 'p', 'q', 'r', 's',
+            't', 'u', 'v', 'w', 'x', 'y','z', 'A', 'B', 'C', 'D',
+            'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L','M', 'N', 'O',
+            'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y','Z',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        // 在 $chars 中随机取 $length 个数组元素键名
+        $keys = array_rand($chars, $length);
+        $password = '';
+        for($i = 0; $i < $length; $i++)
+        {
+            // 将 $length 个数组元素连接成字符串
+            $password .= $chars[$keys[$i]];
+        }
+        return $password;
+    }
+    private function log($log, $type = 'push')
+    {
+        Container::get('log')->record($log, $type);
+    }
+    public function Push () {
+        $result = ['retCode' => 1, 'data'=> [], 'retMsg' => ''];
+        // 是否ajax
+        if(!IS_AJAX)
+        {
+            $result['retMsg'] = '不是ajax';
+            return $result;
+        }
+        // 开始操作
+        $params = input('post.');
+        $this->log('start push params:'. json_encode($params, JSON_UNESCAPED_UNICODE));
+        if (!is_array($params)) {
+            $result['retMsg'] = '参数不是数组';
+            return $result;
+        }
+        foreach ($params as $item) {
+            $this->log('start push item:'. json_encode($item, JSON_UNESCAPED_UNICODE));
+            if (!isset($item['productId'])) {
+                $result['retMsg'] = '产品id错误';
+                return $result;
+            }
+            if (!isset($item['price'])) {
+                $result['retMsg'] = '产品价格错误';
+                return $result;
+            }
+            $default_data_stt =  '
+                        {
+              "title_color": "",
+              "title": "",
+              "simple_desc": "",
+              "model": "",
+              "inventory_unit": "件",
+              "give_integral": "11",
+              "buy_min_number": "1",
+              "buy_max_number": "",
+              "home_recommended_images": "/static/upload/images/goods/2019/01/14/1547453895416529.jpg",
+              "specifications_price": [
+                "168.00"
+              ],
+              "specifications_number": [
+                "99999999"
+              ],
+              "specifications_weight": [
+                ""
+              ],
+              "specifications_coding": [
+                ""
+              ],
+              "specifications_barcode": [
+                ""
+              ],
+              "specifications_original_price": [
+                "99999999"
+              ],
+              "specifications_extends": [
+                ""
+              ],
+              "photo": [
+                "/static/upload/images/goods/2019/01/14/1547453895416529.jpg"
+              ],
+              "content_app_images_543": "/static/upload/images/goods/2019/01/14/1547453910353340.jpg",
+              "content_app_text_543": "",
+              "content_web": "<p>图文&nbsp;<br/></p>",
+              "seo_title": "",
+              "seo_keywords": "",
+              "seo_desc": "",
+              "place_origin": "0",
+              "category_id": "68",
+              "is_deduction_inventory": "1",
+              "is_shelves": "1",
+              "is_home_recommended": "1"
+            }';
+            $default_data = json_decode($default_data_stt, JSON_UNESCAPED_UNICODE);
+            $default_data['title'] = '活动产品' . time() . $this->make_password(5);
+            $default_data['specifications_price'] = [number_format($item['price']/100,2)];
+            $this->log('start insert default_data:'. json_encode($default_data, JSON_UNESCAPED_UNICODE));
+            $ret = ['code' => 1, 'message' => '插入异常'];
+            try {
+                $ret = GoodsService::GoodsSave($default_data);
+                $this->log('start insert suc default_data:'. json_encode($default_data, JSON_UNESCAPED_UNICODE) . ' ret:' . json_encode($ret, JSON_UNESCAPED_UNICODE));
+            } catch (Exception $e) {
+                $ret['message'] = $e->getMessage();
+                $this->log('insert goods error message:'.$e->getMessage());
+            }
+            if ($ret['code'] != 0) {
+                $result['retMsg'] = '创建失败:' . json_encode($ret, JSON_UNESCAPED_UNICODE);
+                return $result;
+            }
+            $item['productName'] = $default_data['title'];
+            $item['outProductId'] = $ret['data']['goods_id'];
+            array_push($result['data'], $item);
+        }
+        $result['retCode'] = 0;
+        $result['retMsg'] = 'suc';
+        $this->log('start insert end: params'. json_encode($params, JSON_UNESCAPED_UNICODE) . ' result:' . json_encode($result, JSON_UNESCAPED_UNICODE));
+        return $result;
+    } 
 }
 ?>

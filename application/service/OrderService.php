@@ -481,7 +481,7 @@ class OrderService
                     'params'        => $params,
                     'order_id'      => $params['order']['id']
                 ]);
-
+                OrderCompleteService::notice_scact($params['order']['id']);
                 return DataReturn('支付成功', 0);
             }
         }

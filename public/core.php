@@ -56,6 +56,8 @@ define('APPLICATION_CLIENT_TYPE', empty($_REQUEST['application_client_type']) ? 
 
 // 是否ajax
 define('IS_AJAX', ((isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 'xmlhttprequest' == strtolower($_SERVER['HTTP_X_REQUESTED_WITH'])) || isset($_REQUEST['ajax']) && $_REQUEST['ajax'] == 'ajax'));
+// scact_api 
+define('SCACT_API','http://localhost:8623');
 
 // 检测是否是新安装
 if(!file_exists(ROOT.'config/database.php'))

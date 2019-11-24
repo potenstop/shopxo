@@ -216,6 +216,8 @@
                                         </div>
                                     </td>
                                     <td class="row-operate" rowspan="{{$order.items_count}}">
+                                        <a href="{{:MyUrl('index/download/ticket', ['id'=>$order['id']])}}" class="am-btn am-btn-success am-btn-xs am-icon-file-excel-o am-radius" style="margin-bottom: 5px"> 导出Excel</a>
+
                                         <!-- 0待确认, 1已确认/待支付, 2已支付/待发货, 3已发货/待收货, 4已完成, 5已取消, 6已关闭 -->
                                         {{if in_array($order['status'], [0,1])}}
                                             <button type="button" class="am-btn am-btn-warning am-btn-xs am-radius am-icon-paint-brush am-btn-block submit-ajax submit-cancel" data-url="{{:MyUrl('index/order/cancel')}}" data-id="{{$order.id}}" data-view="reload"> 取消</button>

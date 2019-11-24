@@ -1758,4 +1758,28 @@ function ParamsChecked($data, $params)
     }
     return true;
 }
+function call_scact_api($sub_url, $params = array(), $method = 'GET')
+{
+    if (!defined('SCACT_API')) throw new Exception('SCACT_API not defined!');
+    $method = strtoupper($method);
+    if ($method != 'GET' and $method != 'POST') throw new Exception('call_scact_api method only support post or get');
+    $opts = [
+        'http' => [
+            'method' => $method,
+            'timeout' => 60
+        ]
+    ];
+    if ($method == 'GET') {
+        $sep = strpos($sub_url, '?') === false ? '?' : '&';
+        $url = SCACT_API . $sub_url . $sep . http_build_query($params);
+    } else {
+        $url = SCACT_API . $sub_url;
+        $opts['http']['header'] = 'Content-Type: application/json';
+        $opts['http']['content'] = json_encode($params);
+    }
+    $context = stream_context_create($opts);
+
+    $res = @file_get_contents($url, false, $context);
+    return json_decode($res, true);
+}
 ?>

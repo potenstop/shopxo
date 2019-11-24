@@ -188,6 +188,7 @@ class Goods extends Common
 		// 开始操作
 		$params = input('post.');
 		$params['admin'] = $this->admin;
+		echo json_encode($params, JSON_UNESCAPED_UNICODE);
 		return GoodsService::GoodsSave($params);
 	}
 

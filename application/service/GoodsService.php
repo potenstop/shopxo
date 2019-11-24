@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 namespace app\service;
 
+use phpmailer\Exception;
 use think\Db;
 use think\facade\Hook;
 use app\service\ResourcesService;
@@ -1219,7 +1220,7 @@ class GoodsService
 
             // 提交事务
             Db::commit();
-            return DataReturn('操作成功', 0);
+            return DataReturn('操作成功', 0, ['goods_id' => $goods_id]);
         }
 
         // 回滚事务
